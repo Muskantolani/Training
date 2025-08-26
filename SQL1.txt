@@ -1,0 +1,150 @@
+CREATE TABLE MEMBER(
+    MEMBER_ID   NUMBER(5) NOT NULL,
+    MEMBER_NAME VARCHAR2(30) NOT NULL,
+    MEMBER_ADDRESS VARCHAR2(50) NOT NULL,
+    ACC_OPEN_DATE DATE NOT NULL,
+    MEMBERSHIP_TYPE VARCHAR2(20) NOT NULL,
+    FEES_PAID NUMBER(4),
+    MAX_BOOKS_ALLOWED NUMBER(2) NOT NULL,
+    PENALTY_AMOUNT NUMBER(7,2) DEFAULT 0 CHECK (PENALTY_AMOUNT>=0),
+    CONSTRAINT PK_MEMBER PRIMARY KEY(MEMBER_ID),
+    CONSTRAINT CK_MEMBERSHIP_TYPE CHECK(MEMBERSHIP_TYPE IN ('LIFETIME','ANNUAL','HALF YEARLY','QUARTERLY'))
+);
+INSERT INTO MEMBER
+(MEMBER_ID,MEMBER_NAME,MEMBER_ADDRESS,ACC_OPEN_DATE,MEMBERSHIP_TYPE,FEES_PAID,MAX_BOOKS_ALLOWED,PENALTY_AMOUNT)
+VALUES(100,'Rachel Green','New York',DATE '2025-06-12','ANNUAL',1200,5,0);
+INSERT INTO MEMBER
+(MEMBER_ID,MEMBER_NAME,MEMBER_ADDRESS,ACC_OPEN_DATE,MEMBERSHIP_TYPE,FEES_PAID,MAX_BOOKS_ALLOWED,PENALTY_AMOUNT)
+VALUES(102,'Joey Tribbiani','London',DATE '2024-05-31','HALF YEARLY',3000,7,100);
+INSERT INTO MEMBER
+(MEMBER_ID,MEMBER_NAME,MEMBER_ADDRESS,ACC_OPEN_DATE,MEMBERSHIP_TYPE,FEES_PAID,MAX_BOOKS_ALLOWED,PENALTY_AMOUNT)
+VALUES (103,'Monica Geller','Austria',DATE '2025-02-01','QUARTERLY',500,1,0);
+INSERT INTO MEMBER
+(MEMBER_ID,MEMBER_NAME,MEMBER_ADDRESS,ACC_OPEN_DATE,MEMBERSHIP_TYPE,FEES_PAID,MAX_BOOKS_ALLOWED,PENALTY_AMOUNT)
+VALUES (104,'Chandler Bong','Japan',DATE '2025-03-21','QUARTERLY',700,4,0);
+select * from MEMBER;
+------
+CREATE TABLE BOOK (
+  BOOK_NO      NUMBER(6)    NOT NULL,
+  BOOK_NAME    VARCHAR2(30) NOT NULL,
+  AUTHOR_NAME  VARCHAR2(30),
+  COST         NUMBER(7,2)  CHECK (COST >= 0),
+  CATEGORY     CHAR(10),
+  CONSTRAINT PK_BOOK PRIMARY KEY (BOOK_NO)
+);
+INSERT INTO BOOK VALUES (3001, 'A', 'Loni',799.00, 'SCIENCE');
+INSERT INTO BOOK VALUES (3002, 'B', 'B.S. Grewal',650.00, 'SCIENCE');
+INSERT INTO BOOK VALUES (3003, 'C', 'Loni',720.50, 'DATABASE');
+INSERT INTO BOOK VALUES (3004, 'D', 'Silberschatz', 350.75, 'DATABASE');
+INSERT INTO BOOK VALUES (3005, 'E', 'Abraham Silberschatz',499.00, 'DATABASE');
+INSERT INTO BOOK VALUES (3006, 'F', 'Andrew Tanenbaum',950.00, 'DATABASE');
+INSERT INTO BOOK VALUES (3007, 'G', 'Loni',599.50, 'MECH');
+INSERT INTO BOOK VALUES (3008, 'H', 'S. Ramamrutham',675.25, 'CIVIL');
+INSERT INTO BOOK VALUES (3009, 'I', 'Alan Oppenheim',725.00, 'ECE');
+INSERT INTO BOOK VALUES (3010, 'J', 'Ramesh Gaonkar',780.00, 'ECE');
+INSERT INTO BOOK VALUES (3011, 'K', 'Loni',820.00, 'CSE');
+INSERT INTO BOOK VALUES (3012, 'L', 'Stuart Russell',999.00, 'CSE');
+SELECT * FROM BOOK;
+-----
+CREATE TABLE ISSUE (
+  LIB_ISSUE_ID  NUMBER(10)  NOT NULL,
+  BOOK_NO       NUMBER(6)   NOT NULL,
+  MEMBER_ID     NUMBER(5)   NOT NULL,
+  ISSUE_DATE    DATE        NOT NULL,
+  RETURN_DATE   DATE,
+  CONSTRAINT PK_ISSUE PRIMARY KEY (LIB_ISSUE_ID),
+  CONSTRAINT FK_ISSUE_BOOK FOREIGN KEY (BOOK_NO)
+      REFERENCES BOOK (BOOK_NO),
+  CONSTRAINT FK_ISSUE_MEMBER FOREIGN KEY (MEMBER_ID)
+      REFERENCES MEMBER (MEMBER_ID),
+  CONSTRAINT CK_RETURN_DATE CHECK (RETURN_DATE IS NULL OR RETURN_DATE >= ISSUE_DATE)
+);
+INSERT INTO ISSUE VALUES (90001, 3001, 100, DATE '2025-06-15', DATE '2025-06-25');
+INSERT INTO ISSUE VALUES (90002, 3003, 102, DATE '2025-06-20', NULL);
+INSERT INTO ISSUE VALUES (90003, 3004, 100, DATE '2025-07-01', DATE '2025-07-15');
+INSERT INTO ISSUE VALUES (90004, 3006, 104, DATE '2025-07-10', NULL);
+SELECT * FROM ISSUE;
+-----
+
+-- List all the books that are written by Author x and has price less then 900.
+SELECT * FROM BOOK WHERE AUTHOR_NAME='Silberschatz' AND COST<=900;
+
+-- List the Issue details for the books that are not returned yet.
+SELECT * FROM ISSUE WHERE RETURN_DATE IS NULL;
+
+-- Update all the blank return_date with 31-Dec-06 excluding 7005 and 7006(EXCEPT THIS ISSUE ID)
+UPDATE ISSUE SET RETURN_DATE = DATE '2025-12-31' WHERE RETURN_DATE IS NULL
+SELECT * FROM ISSUE;
+-- AND LIB_ISSUE_ID NOT IN (7005,7006)
+
+-- List all the Issue details that have books issued for more then 30 days.
+SELECT * FROM ISSUE WHERE (RETURN_DATE - ISSUE_DATE)>30;
+
+-- List all the books that have price in range of 500 to 750 and has category as Database(ECE)
+SELECT * FROM BOOK WHERE COST BETWEEN 500 AND 750 AND CATEGORY='ECE';
+
+-- List all the books that belong to any one of the following categories Science, Database, Fiction, Management.
+SELECT * FROM BOOK WHERE CATEGORY IN ('MECH','TECH','CIVIL');
+
+-- List all the members in the descending order of Penalty due on them.
+SELECT * FROM MEMBER ORDER BY PENALTY_AMOUNT DESC;
+
+-- List all the books in ascending order of category and descending order of price
+SELECT * FROM BOOK ORDER BY CATEGORY ASC, COST DESC;
+
+-- List all the books that contain word 'CONCEPTS' in the name of the book.
+SELECT * FROM BOOK WHERE BOOK_NAME LIKE '%Concept%';
+
+-- List all the members whose name starts with R or G and contains letter 'C' in it.
+SELECT * FROM MEMBER WHERE
+(MEMBER_NAME LIKE 'R%' OR MEMBER_NAME LIKE 'G%') AND MEMBER_NAME LIKE '%c%';
+
+-- List the entire book name in Init cap and author in upper case in the descending order of the book name.
+SELECT INITCAP(BOOK_NAME) AS CAP_BOOK_NAME, UPPER(AUTHOR_NAME) AS CAPS_AUTHOR_NAME FROM BOOK ORDER BY BOOK_NAME DESC; 
+
+-- List the Issue Details for all the books issue by member '100' with Issue_date and Return Date in following format. ‘Monday, July, 10, 2006’.
+
+
+-- List the data in the book table with category data displayed as D for Database, S for Science, R for RDBMS and O for all the others
+SELECT BOOK_NAME,COST,
+CASE 
+    WHEN CATEGORY IN ('TECH') THEN 'T'
+    WHEN CATEGORY IN ('MECH') THEN 'M'
+    WHEN CATEGORY IN ('CSE') THEN 'C'
+    ELSE 'O'
+    END AS CATEGORY_CODE
+FROM BOOK;
+
+-- List all the members that became the member in the year 2006. (2024)
+SELECT * FROM MEMBER WHERE ACC_OPEN_DATE>= DATE '2024-01-01' AND ACC_OPEN_DATE<DATE '2025-01-01'
+
+-- List the Lib_Issue_Id, Issue_Date, Return_Date and No of days Book was issued.
+SELECT LIB_ISSUE_ID,ISSUE_DATE,RETURN_DATE, (RETURN_DATE-ISSUE_DATE) AS DAYS_ISSUED FROM ISSUE;
+
+-- Find the details of the member of the Library in the order of their joining the library
+SELECT * FROM MEMBER ORDER BY ACC_OPEN_DATE;
+
+-- Display the count of total no of books issued to Member 100.
+SELECT COUNT(*) FROM ISSUE WHERE MEMBER_ID=100;
+
+-- Display the total penalty due for all the members
+SELECT SUM(PENALTY_AMOUNT) FROM MEMBER;
+
+-- Display the total no of members 
+SELECT COUNT(*) FROM MEMBER
+
+-- Display the total no of books issued 
+SELECT COUNT(*) FROM ISSUE
+
+-- Display the average membership fees paid by all the members
+SELECT AVG(FEES_PAID) FROM MEMBER
+
+-- Display no of months between issue date and return date for all issue
+
+-- Display the length of member’s name
+SELECT MEMBER_ID,MEMBER_NAME,LENGTH(MEMBER_NAME) FROM MEMBER
+
+-- Display the first 5 characters of  membership_type for all members
+SELECT MEMBER_ID, MEMBER_NAME, MEMBERSHIP_TYPE, SUBSTR(MEMBERSHIP_TYPE,1,5) FROM MEMBER;
+
+-- Display the last day of the month of issue date 
