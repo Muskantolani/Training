@@ -105,7 +105,7 @@ SELECT INITCAP(BOOK_NAME) AS CAP_BOOK_NAME, UPPER(AUTHOR_NAME) AS CAPS_AUTHOR_NA
 -- List the Issue Details for all the books issue by member '100' with Issue_date and Return Date in following format. ‘Monday, July, 10, 2006’.
 
 
--- List the data in the book table with category data displayed as D for Database, S for Science, R for RDBMS and O for all the others
+-- List the data in the book table with category data displayed as D for Database, S for Science, R for RDBMS and O for all the othErs
 SELECT BOOK_NAME,COST,
 CASE 
     WHEN CATEGORY IN ('TECH') THEN 'T'
@@ -140,6 +140,7 @@ SELECT COUNT(*) FROM ISSUE
 SELECT AVG(FEES_PAID) FROM MEMBER
 
 -- Display no of months between issue date and return date for all issue
+SELECT LIB_ISSUE_ID, ISSUE_DATE, RETURN_DATE, MONTHS_BETWEEN(RETURN_DATE,ISSUE_DATE) FROM ISSUE;
 
 -- Display the length of member’s name
 SELECT MEMBER_ID,MEMBER_NAME,LENGTH(MEMBER_NAME) FROM MEMBER
@@ -148,3 +149,4 @@ SELECT MEMBER_ID,MEMBER_NAME,LENGTH(MEMBER_NAME) FROM MEMBER
 SELECT MEMBER_ID, MEMBER_NAME, MEMBERSHIP_TYPE, SUBSTR(MEMBERSHIP_TYPE,1,5) FROM MEMBER;
 
 -- Display the last day of the month of issue date 
+SELECT LIB_ISSUE_ID, ISSUE_DATE,LAST_DAY(ISSUE_DATE),TO_CHAR(LAST_DAY(ISSUE_DATE),'DD-MON-YYYY') FROM ISSUE;
